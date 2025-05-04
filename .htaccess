@@ -1,0 +1,115 @@
+# --------------------------
+# Custom Error Pages
+# --------------------------
+ErrorDocument 404 /404.php
+ErrorDocument 405 /404.php
+ErrorDocument 500 /404.php
+ErrorDocument 201 /404.php
+
+# --------------------------
+# Allow access to ads.txt
+# --------------------------
+<Files "ads.txt">
+    Require all granted
+</Files>
+
+# --------------------------
+# Redirect www to non-www
+# (Prevents CORS errors with Webpushr)
+# --------------------------
+RewriteEngine On
+RewriteCond %{HTTP_HOST} ^www\.ggusoc\.in$ [NC]
+RewriteRule ^(.*)$ https://ggusoc.in/$1 [L,R=301]
+
+# --------------------------
+# Prevent rewrite for contact.php
+# --------------------------
+RewriteCond %{REQUEST_URI} ^/contact\.php$ [NC]
+RewriteRule ^ - [L]
+
+# --------------------------
+# Clean Blog URL Redirects
+# --------------------------
+
+# blog-post.php?id=xxx → /blog/xxx
+RewriteCond %{QUERY_STRING} ^id=([a-zA-Z0-9_-]+)$ [NC]
+RewriteRule ^blog-post\.php$ /blog/%1? [R=301,L]
+
+# blog/blog.php?category=xxx → /blog/xxx
+RewriteCond %{QUERY_STRING} ^category=([a-zA-Z0-9_-]+)$ [NC]
+RewriteRule ^blog/blog\.php$ /blog/%1? [R=301,L]
+
+# blog.php?tag=xxx → /blog/tag/xxx
+RewriteCond %{QUERY_STRING} ^tag=([a-zA-Z0-9_-]+)$ [NC]
+RewriteRule ^blog\.php$ /blog/tag/%1? [R=301,L]
+
+# /blog?tag=html → /blog
+RewriteCond %{QUERY_STRING} .+
+RewriteRule ^blog/?$ /blog? [R=301,L]
+
+# --------------------------
+# Blog Pretty URL Handling
+# --------------------------
+
+# /blog/slug → blog-post.php?slug=slug
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^blog/([a-zA-Z0-9-]+)/?$ blog-post.php?slug=$1 [L,NC]
+
+# /blog/tag/xxx → blog/blog.php?tag=xxx
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^blog/tag/([a-zA-Z0-9-]+)/?$ blog/blog.php?tag=$1 [L,NC]
+
+# /blog/category → blog/blog.php?category=category
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^blog/([a-zA-Z0-9-]+)/?$ blog/blog.php?category=$1 [L,NC]
+
+# --------------------------
+# Remove .php from URLs
+# --------------------------
+# Internally rewrite extension-less to .php
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME}.php -f
+RewriteRule ^(.*)$ $1.php [L]
+
+# Redirect visible .php URLs to clean ones (except important exclusions)
+RewriteCond %{REQUEST_METHOD} !POST
+RewriteCond %{THE_REQUEST} \.php
+RewriteCond %{REQUEST_URI} !^/admin/login\.php [NC]
+RewriteCond %{QUERY_STRING} !^(category|tag)= [NC]
+RewriteRule ^(.*)\.php$ /$1 [R=301,L]
+
+# --------------------------
+# Protect sensitive files
+# --------------------------
+<FilesMatch "(config\.php|includes/.*\.php)$">
+    Require all denied
+</FilesMatch>
+
+# --------------------------
+# Compression
+# --------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>
+
+# --------------------------
+# Browser caching
+# --------------------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType text/javascript "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType application/xml "access plus 1 month"
+    ExpiresDefault "access plus 2 days"
+</IfModule>
