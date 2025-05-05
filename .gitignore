@@ -1,4 +1,4 @@
 /vendor/
-.env
+.env 
 node_modules/
 /firebase-credentials.json
